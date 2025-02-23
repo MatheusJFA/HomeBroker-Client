@@ -1,47 +1,48 @@
-import AssetRow from "@/components/AssetRow";
+import { Table, TableHead, TableHeadCell, TableBody } from "flowbite-react";
+import { Order } from "@/models";
+import OrderRow from "@/components/OrderRow";
 import { WalletList } from "@/components/WalletList";
-import { Wallet } from "@/models";
-import { Table, TableBody, TableHead, TableHeadCell } from "flowbite-react";
 
-export async function getMyWallet(wallet_id: string): Promise<Wallet> {
-  const url = `${process.env.URL_BACKEND}/wallets/${wallet_id}`;
-  const response = await fetch(url);
+export async function getOrders(walletId: string): Promise<Order[]> {
+  const response = await fetch(
+    `${process.env.URL_BACKEND}/orders?walletId=${walletId}`
+  );
   return response.json();
 }
 
-export default async function MyWalletList({
+export default async function OrderList({
   searchParams,
 }: {
   searchParams: Promise<{ wallet_id: string }>;
 }) {
   const { wallet_id } = await searchParams;
-  const wallet = await getMyWallet(wallet_id);
 
-  if (!wallet_id || !wallet) {
+  if (!wallet_id) {
     return <WalletList />;
   }
+
+  const orders = await getOrders(wallet_id);
 
   return (
     <div className="flex flex-col space-y-5 flex-grow">
       <article className="format">
-        <h1>Minha carteira</h1>
+        <h1>Minha ordens</h1>
       </article>
 
       <div className="overflow-x-auto w-full">
         <Table className="w-full max-w-full table-fixed">
           <TableHead>
             <TableHeadCell>Ativo</TableHeadCell>
-            <TableHeadCell>Cotação</TableHeadCell>
+            <TableHeadCell>Preço</TableHeadCell>
             <TableHeadCell>Quantidade</TableHeadCell>
+            <TableHeadCell>Tipo</TableHeadCell>
+            <TableHeadCell>Status</TableHeadCell>
+            <TableHeadCell>Cotação</TableHeadCell>
             <TableHeadCell>Comprar/Vender</TableHeadCell>
           </TableHead>
           <TableBody>
-            {wallet.assets.map((walletAsset, key) => (
-              <AssetRow
-                asset={walletAsset.asset}
-                key={key}
-                wallet_id={wallet_id}
-              />
+            {orders.map((order, key) => (
+              <OrderRow order={order} key={key} />
             ))}
           </TableBody>
         </Table>
